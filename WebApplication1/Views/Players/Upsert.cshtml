@@ -1,0 +1,147 @@
+﻿
+@{
+    ViewData["Title"] = "Upsert";
+}
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+@model WebApplication1.Models.Player
+
+<br />
+<h2 class="text-info">@(Model.Id != 0 ? "Edit" : "Create") Player</h2>
+<br />
+
+<div class="border container" style="padding:30px;">
+    <form method="post">
+        @if (Model.Id != 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Name"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Surname"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Surname" class="form-control" />
+                <span asp-validation-for="Surname" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Gender"></label>
+            </div>
+            <div class="col-6">
+                <select asp-for="Gender" asp-items="@new SelectList(Enum.GetNames(typeof(Gender)))" class="form-control"></select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Birth"></label>
+            </div>
+            <div class="col-6">
+                <input asp-for="Birth" class="form-control" />
+                <span asp-validation-for="Birth" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="TeamId"></label>
+            </div>
+            <div class="col-6">
+                <select asp-for="TeamId" asp-items="ViewBag.teams" class="form-control"></select>
+                <span asp-validation-for="TeamId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label>Create Team</label>
+            </div>
+            <div class="col-6">
+                <input id="TeamName" class="form-control" name="TeamName" value="" />
+                <input type="button" class="btn btn-primary form-control" value="Create Team" id="buttonTeam">
+                <span class="text-danger field-validation-valid" id="TeamError"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3">
+                <label asp-for="Country"></label>
+            </div>
+            <div class="col-6">
+                <select asp-for="Country" asp-items="@new SelectList(Enum.GetNames(typeof(Country)))" class="form-control"></select>
+                <span asp-validation-for="Country" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-3 offset-3">
+                <button type="submit" class="btn btn-primary form-control">
+                    @(Model.Id != 0 ? "Update" : "Create")
+                </button>
+            </div>
+            <div class="col-3">
+                <a asp-action="Index" class="btn btn-success form-control">Back to List</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#Birth').flatpickr({dateFormat: 'd/m/Y', maxDate: "today"})
+            $('#buttonTeam').click(function () {
+                var teamError = document.getElementById('TeamError');
+                var teamName = document.getElementById('TeamName');
+                var teamSelect = document.getElementById('TeamId');
+
+                var data = { name: teamName.value }
+
+                $.ajax({
+                    url: '@Url.Action("Create","Teams")',
+                    type: 'post',
+                    contentType: 'application/json',
+                    dataType: "JSON",
+                    headers:
+                    {
+                        "RequestVerificationToken": '@GetAntiXsrfRequestToken()'
+                    },
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        console.log(result);
+                        console.log(result.name);
+                        console.log(result.teamId);
+                        var option = document.createElement('option');
+                        option.innerText = result.name;
+                        option.value = result.teamId;
+                        option.setAttribute('value', result.teamId);
+                        option.selected = true;
+                        teamSelect.insertAdjacentElement('afterbegin', option);
+                        teamError.innerHTML = '';
+                        teamName.value = '';
+                    },
+                    error: function (xhr, textStatus, exceptionThrown) {
+                        var errorData = $.parseJSON(xhr.responseText);
+                        teamError.innerHTML = errorData;
+                    }
+                });
+            });
+        });
+    </script>
+}
