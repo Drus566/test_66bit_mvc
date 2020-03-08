@@ -2,28 +2,42 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-//Disable send button until connection is established
-document.getElementById("sendButton").disabled = true;
+connection.on("ReceiveMessage", function (id, name, surname, birth, team, gender, country) {
+    var man = document.getElementById(id);
 
-connection.on("ReceiveMessage", function (user, message) {
-    var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    var encodedMsg = user + " says " + msg;
-    var li = document.createElement("li");
-    li.textContent = encodedMsg;
-    document.getElementById("messagesList").appendChild(li);
+    if (man) {
+        man.getElementsByClassName("Name")[0].innerHTML = name;
+        man.getElementsByClassName("Surname")[0].innerHTML = surname;
+        man.getElementsByClassName("Gender")[0].innerHTML = gender;
+        man.getElementsByClassName("Birth")[0].innerHTML = birth;
+        man.getElementsByClassName("Team")[0].innerHTML = team;
+        man.getElementsByClassName("Country")[0].innerHTML = country;
+    } else {
+        var tr = document.createElement("tr");
+        tr.setAttribute('id', id);
+        tr.className = "text-center";
+
+        [name, surname, gender, birth, team, country].forEach(function (item) {
+            var td = document.createElement("td");
+            td.className = getName(item)[0].ToUpperCase();
+            td.innerText = item;
+
+            tr.insertAdjacentElement('afterend', td);
+        });
+
+        //var td = document.createElement("td");
+        //var a = document.createElement("a")
+        //<td>
+        //    <a asp-action="Upsert" asp-route-id="@p.Id" asp-controller="Players" class="btn btn-outline-dark form-control">
+        //        Edit
+        //    </a>
+        //</td>
+
+    }
 });
 
 connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
+    console.log('Start connection');
 }).catch(function (err) {
     return console.error(err.toString());
-});
-
-document.getElementById("sendButton").addEventListener("click", function (event) {
-    var user = document.getElementById("userInput").value;
-    var message = document.getElementById("messageInput").value;
-    connection.invoke("SendMessage", user, message).catch(function (err) {
-        return console.error(err.toString());
-    });
-    event.preventDefault();
 });

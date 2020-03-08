@@ -1,0 +1,18 @@
+﻿@model IEnumerable<Player>
+
+@foreach (Player p in Model)
+{
+    <tr id="@p.Id" class="text-center">
+        <td class="Name">@p.Name</td>
+        <td class="Surname">@p.Surname</td>
+        <td class="Gender">@p.Gender</td>
+        <td class="Birth">@p.Birth</td>
+        <td class="Team">@p.Team?.Name</td>
+        <td class="Country">@p.Country</td>
+        <td>
+            <a asp-action="Upsert" asp-route-id="@p.Id" asp-controller="Players" class="btn btn-outline-dark form-control">
+                Edit
+            </a>
+        </td>
+    </tr>
+}

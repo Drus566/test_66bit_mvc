@@ -88,7 +88,7 @@
         </div>
         <div class="form-group row">
             <div class="col-3 offset-3">
-                <button type="submit" class="btn btn-primary form-control">
+                <button type="submit" id="UpsetButton" class="btn btn-primary form-control">
                     @(Model.Id != 0 ? "Update" : "Create")
                 </button>
             </div>
@@ -105,7 +105,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#Birth').flatpickr({dateFormat: 'd/m/Y', maxDate: "today"})
+            // Flatpickr
+            $('#Birth').flatpickr({ dateFormat: 'd/m/Y', maxDate: "today" })
+            // Ajax create Team
             $('#buttonTeam').click(function () {
                 var teamError = document.getElementById('TeamError');
                 var teamName = document.getElementById('TeamName');
@@ -136,7 +138,7 @@
                         teamError.innerHTML = '';
                         teamName.value = '';
                     },
-                    error: function (xhr, textStatus, exceptionThrown) {
+                    error: function (xhr) {
                         var errorData = $.parseJSON(xhr.responseText);
                         teamError.innerHTML = errorData;
                     }

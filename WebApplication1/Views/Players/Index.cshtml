@@ -25,22 +25,7 @@
                         <th>Options</th>
                     </tr>
                 </thead>
-                @foreach (Player p in Model)
-                {
-                    <tr class="text-center">
-                        <td>@p.Name</td>
-                        <td>@p.Surname</td>
-                        <td>@p.Gender</td>
-                        <td>@p.Birth</td>
-                        <td>@p.Team?.Name</td>
-                        <td>@p.Country</td>
-                        <td>
-                            <a asp-action="Upsert" asp-route-id="@p.Id" asp-controller="Players" class="btn btn-outline-dark form-control">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
-                }
+                @await Html.PartialAsync("_GetPlayer", Model)
             }
             else
             {
@@ -49,8 +34,3 @@
         </table>
     </div>
 </div>
-
-@section Scripts{
-    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/chat.js"></script>
-}

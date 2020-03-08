@@ -7,19 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using WebApplication1.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 namespace WebApplication1.Controllers
 {
     public class PlayersController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly IHubContext<ChatHub> _hub;
         [BindProperty]
         public Player Player { get; set; }
         [BindProperty]
         public Player Team { get; set; }
-        public PlayersController(ApplicationDbContext db)
+        public PlayersController(ApplicationDbContext db, IHubContext<ChatHub> hub)
         {
             _db = db;
+            _hub = hub;
         }
         
         // GET: Players
@@ -59,11 +64,10 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert()
+        public async Task<IActionResult> Upsert()
         {
             if (ModelState.IsValid)
             {
-             
                 if (Player.Id == 0)
                 {
                     //create
@@ -74,6 +78,19 @@ namespace WebApplication1.Controllers
                     _db.Players.Update(Player);
                 }
                 _db.SaveChanges();
+
+                string id = Player.Id.ToString();
+                string name = Player.Name;
+                string surname = Player.Surname;
+                string birth = Player.Birth;
+                string team = _db.Teams.FirstOrDefault(t => t.TeamId == Player.TeamId).Name;
+                string gender = Player.Gender.ToString();
+                string country = Player.Country.ToString();
+
+                // Пытался сделать отрендерить партиал GetPlayer и отдать SendAsync как строку,
+                // но не нашел как рендерить html в строку
+
+                await _hub.Clients.All.SendAsync("ReceiveMessage", id, name, surname, birth, team, gender, country);
                 return RedirectToAction("Index");
             }
             return View(Player);
