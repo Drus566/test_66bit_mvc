@@ -87,7 +87,7 @@ namespace WebApplication1.Controllers
                 string gender = Player.Gender.ToString();
                 string country = Player.Country.ToString();
 
-                // Пытался сделать отрендерить партиал GetPlayer и отдать SendAsync как строку,
+                // Пытался отрендерить партиал GetPlayer и отдать в SendAsync как строку,
                 // но не нашел как рендерить html в строку
 
                 await _hub.Clients.All.SendAsync("ReceiveMessage", id, name, surname, birth, team, gender, country);
